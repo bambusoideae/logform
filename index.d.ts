@@ -11,7 +11,7 @@ export interface TransformableInfo {
 }
 
 export type TransformFunction = (info: TransformableInfo, opts?: any) => TransformableInfo | boolean;
-export type Colors = { [key: string]: string | string[] }; // tslint:disable-line interface-over-type-literal
+export type Colors = { [key: string]: string | string[] | ((message: number) => string) }; // tslint:disable-line interface-over-type-literal
 export type FormatWrap = (opts?: any) => Format;
 
 export class Format {

@@ -1,7 +1,7 @@
 'use strict';
 
 const assume = require('assume');
-const colors = require('colors/safe');
+const chalk = require('chalk');
 const { configs, LEVEL } = require('triple-beam');
 const colorize = require('../colorize');
 const Colorizer = colorize.Colorizer;
@@ -21,7 +21,7 @@ describe('colorize', () => {
     info => {
       assume(info.level).is.a('string');
       assume(info.message).is.a('string');
-      assume(info.level).equals(colors.green('info'));
+      assume(info.level).equals(chalk.green('info'));
       assume(info.message).equals('whatever');
     }
   ));
@@ -32,7 +32,7 @@ describe('colorize', () => {
     info => {
       assume(info.level).is.a('string');
       assume(info.message).is.a('string');
-      assume(info.level).equals(colors.green('info'));
+      assume(info.level).equals(chalk.green('info'));
       assume(info.message).equals('whatever');
     }
   ));
@@ -44,7 +44,7 @@ describe('colorize', () => {
       assume(info.level).is.a('string');
       assume(info.message).is.a('string');
       assume(info.level).equals('info');
-      assume(info.message).equals(colors.green('whatever'));
+      assume(info.message).equals(chalk.green('whatever'));
     }
   ));
 
@@ -54,8 +54,8 @@ describe('colorize', () => {
     info => {
       assume(info.level).is.a('string');
       assume(info.message).is.a('string');
-      assume(info.level).equals(colors.green('info'));
-      assume(info.message).equals(colors.green('whatever'));
+      assume(info.level).equals(chalk.green('info'));
+      assume(info.message).equals(chalk.green('whatever'));
     }
   ));
 
@@ -65,8 +65,8 @@ describe('colorize', () => {
     info => {
       assume(info.level).is.a('string');
       assume(info.message).is.a('string');
-      assume(info.level).equals(colors.green('info'));
-      assume(info.message).equals(colors.green('whatever'));
+      assume(info.level).equals(chalk.green('info'));
+      assume(info.message).equals(chalk.green('whatever'));
     }
   ));
 
@@ -76,7 +76,7 @@ describe('colorize', () => {
     info => {
       assume(info.level).is.a('string');
       assume(info.message).is.a('string');
-      assume(info.level).equals(colors.green('INFO'));
+      assume(info.level).equals(chalk.green('INFO'));
     }
   ));
 });
@@ -111,26 +111,32 @@ describe('Colorizer', () => {
     assume(Colorizer.allColors.delimited).deep.equals(['blue', 'underline']);
   });
 
+  it('Colorizer.addColors({ function: function (message) })', () => {
+    Colorizer.addColors({ multiple: ['red', 'bold'] });
+    assume(Colorizer.allColors.multiple).is.an('array');
+    assume(Colorizer.allColors.multiple).deep.equals(['red', 'bold']);
+  });
+
   describe('#colorize(LEVEL, level, message)', () => {
     const instance = new Colorizer();
 
     it('colorize(level) [single color]', () => {
-      assume(instance.colorize('weird', 'weird')).equals(colors.cyan('weird'));
+      assume(instance.colorize('weird', 'weird')).equals(chalk.cyan('weird'));
     });
 
     it('colorize(level) [multiple colors]', () => {
       assume(instance.colorize('multiple', 'multiple')).equals(
-        colors.bold(colors.red('multiple'))
+        chalk.bold(chalk.red('multiple'))
       );
     });
 
     it('colorize(level, message) [single color]', () => {
-      assume(instance.colorize('weird', 'weird', 'message')).equals(colors.cyan('message'));
+      assume(instance.colorize('weird', 'weird', 'message')).equals(chalk.cyan('message'));
     });
 
     it('colorize(level, message) [multiple colors]', () => {
       assume(instance.colorize('multiple', 'multiple', 'message')).equals(
-        colors.bold(colors.red('message'))
+        chalk.bold(chalk.red('message'))
       );
     });
   });
