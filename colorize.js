@@ -32,6 +32,12 @@ class Colorizer {
     const nextColors = Object.keys(colors).reduce((acc, level) => {
       if (typeof colors[level] === 'function') {
         acc[level] = colors[level];
+      } else if (Array.isArray(colors[level])) {
+        acc[level] = chalk;
+
+        for (let i = 0; i < colors[level].length; i++) {
+          acc[level] = acc[level][colors[level][i]];
+        }
       } else if (hasSpace.test(colors[level])) {
         const formatChain = colors[level].split(hasSpace);
         acc[level] = chalk;
