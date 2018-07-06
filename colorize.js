@@ -1,12 +1,7 @@
 'use strict';
 
-const colors = require('colors/safe');
+const chalk = require('chalk');
 const { LEVEL } = require('triple-beam');
-
-//
-// Fix colors not appearing in non-tty environments
-//
-colors.enabled = true;
 
 /**
  * @property {RegExp} hasSpace
@@ -31,13 +26,22 @@ class Colorizer {
    * Adds the colors Object to the set of allColors
    * known by the Colorizer
    *
-   * @param {Object} colors Set of color mappings to add.
+   * @param {Object} colors Set of color or format function mappings to add.
    */
-  static addColors(clrs) {
-    const nextColors = Object.keys(clrs).reduce((acc, level) => {
-      acc[level] = hasSpace.test(clrs[level])
-        ? clrs[level].split(hasSpace)
-        : clrs[level];
+  static addColors(colors) {
+    const nextColors = Object.keys(colors).reduce((acc, level) => {
+      if (typeof colors[level] === 'function') {
+        acc[level] = colors[level];
+      } else if (hasSpace.test(colors[level])) {
+        const formatChain = colors[level].split(hasSpace);
+        acc[level] = chalk;
+
+        for (let i = 0; i < formatChain.length; i++) {
+          acc[level] = acc[level][formatChain[i]];
+        }
+      } else {
+        acc[level] = chalk[colors[level]];
+      }
 
       return acc;
     }, {});
@@ -52,36 +56,20 @@ class Colorizer {
    *
    * @param {Object} colors Set of color mappings to add.
    */
-  addColors(clrs) {
-    return Colorizer.addColors(clrs);
+  addColors(colors) {
+    return Colorizer.addColors(colors);
   }
 
   /*
    * function colorize (lookup, level, message)
-   * Performs multi-step colorization using colors/safe
+   * Performs colorization using Colorizer.allColors
    */
   colorize(lookup, level, message) {
     if (typeof message === 'undefined') {
       message = level;
     }
 
-    //
-    // If the color for the level is just a string
-    // then attempt to colorize the message with it.
-    //
-    if (!Array.isArray(Colorizer.allColors[lookup])) {
-      return colors[Colorizer.allColors[lookup]](message);
-    }
-
-    //
-    // If it is an Array then iterate over that Array, applying
-    // the colors function for each item.
-    //
-    for (let i = 0, len = Colorizer.allColors[lookup].length; i < len; i++) {
-      message = colors[Colorizer.allColors[lookup][i]](message);
-    }
-
-    return message;
+    return Colorizer.allColors[lookup](message);
   }
 
   /*
@@ -108,11 +96,10 @@ class Colorizer {
  * level colors to `info` objects. This was previously exposed
  * as { colorize: true } to transports in `winston < 3.0.0`.
  */
-module.exports = opts => new Colorizer(opts);
+module.exports = (opts) => new Colorizer(opts);
 
 //
 // Attach the Colorizer for registration purposes
 //
-module.exports.Colorizer
-  = module.exports.Format
-  = Colorizer;
+module.exports.Colorizer = Colorizer;
+module.exports.Format = Colorizer;
